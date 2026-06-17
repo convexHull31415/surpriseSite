@@ -458,11 +458,11 @@ document.getElementById('btnOopsBack').addEventListener('click', function() {
     dayPicker.appendChild(btn);
   });
 
-  // Generate times 5:00 PM - 10:00 PM in 30-min increments
+  // Generate times 5:00 PM - 8:30 PM in 30-min increments
   var times = [];
-  for (var h = 17; h <= 22; h++) {
+  for (var h = 17; h <= 20; h++) {
     for (var m = 0; m < 60; m += 30) {
-      if (h === 22 && m === 30) break; // stop at 10:00 PM
+      if (h === 20 && m > 30) break; // stop at 8:30 PM
       var hour12 = h > 12 ? h - 12 : h;
       var label = hour12 + ':' + (m === 0 ? '00' : '30') + ' PM';
       times.push(label);
