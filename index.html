@@ -360,6 +360,8 @@
     <h2>Copy and paste into chat</h2>
     <button class="btn" id="btnCopy">Copy Results</button>
     <div class="copied-toast" id="toast"></div>
+    <br>
+    <button class="btn" id="btnChange" style="background:#555;margin-top:8px;">Change Choices</button>
   </div>
 </div>
 
@@ -525,6 +527,9 @@ activities.forEach(function(a) {
   });
   actGrid.appendChild(btn);
 });
+
+/* -- Change choices -- */
+document.getElementById('btnChange').addEventListener('click', function() { show('page-datetime'); });
 
 /* -- Copy results -- */
 document.getElementById('btnCopy').addEventListener('click', function() {
