@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Enter Code</title>
+<style>
+  :root {
+    --bg: #0f0f1a;
+    --card: #1a1a2e;
+    --accent: #e94560;
+    --text: #eee;
+    --muted: #888;
+    --radius: 16px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .page {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 480px;
+    animation: fadeIn 0.4s ease;
+  }
+  .page.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 36px 28px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+
+  h1 { font-size: 1.6rem; margin-bottom: 24px; }
+  h2 { font-size: 1.3rem; margin-bottom: 20px; color: var(--muted); }
+
+  .input-wrap {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .input-wrap input {
+    width: 100%;
+    padding: 14px 50px 14px 18px;
+    border: 2px solid #333;
+    border-radius: 12px;
+    background: #111;
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-wrap input:focus { border-color: var(--accent); }
+  .toggle-eye {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .error-msg {
+    color: var(--accent);
+    font-size: 0.85rem;
+    min-height: 1.2em;
+    margin-bottom: 8px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .btn:active { transform: scale(0.96); opacity: 0.85; }
+
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .emoji-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+  .emoji-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 8px;
+    border: 2px solid #333;
+    border-radius: 16px;
+    background: #111;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s, background 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .emoji-btn:active { transform: scale(0.94); }
+  .emoji-btn:hover  { border-color: var(--accent); background: #1e1028; }
+
+  .emoji-btn .icon { font-size: 2.6rem; line-height: 1; }
+  .emoji-btn .label { font-size: 0.8rem; color: var(--muted); }
+
+  .poem {
+    white-space: pre-wrap;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    color: #ccc;
+  }
+
+  .checkmark { font-size: 3.5rem; margin-bottom: 16px; }
+  .copied-toast {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: #6f6;
+    min-height: 1.2em;
+  }
+
+  @media (max-width: 400px) {
+    .card { padding: 28px 18px; }
+    .emoji-btn .icon { font-size: 2.2rem; }
+    .emoji-grid { gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: PASSWORD -->
+<div id="page-password" class="page active">
+  <div class="card">
+    <h1>Secret Code &#128064;</h1>
+    <div class="input-wrap">
+      <input id="pw" type="password" placeholder="Enter the code..." autocomplete="off" autocapitalize="off">
+      <button class="toggle-eye" id="toggleEye" aria-label="Toggle visibility">&#128584;</button>
+    </div>
+    <div class="error-msg" id="pwError"></div>
+    <button class="btn" id="btnUnlock">Enter</button>
+  </div>
+</div>
+
+<!-- PAGE 2: POEM -->
+<div id="page-poem" class="page">
+  <div class="card">
+    <h1>A Little Something&hellip;</h1>
+    <div class="poem" id="poemText">POEM</div>
+    <button class="btn" id="btnNext">Next &rarr;</button>
+  </div>
+</div>
+
+<!-- PAGE 3: FOOD -->
+<div id="page-food" class="page">
+  <div class="card">
+    <h2>Pick your craving</h2>
+    <div class="emoji-grid" id="foodGrid"></div>
+  </div>
+</div>
+
+<!-- PAGE 4: ACTIVITY -->
+<div id="page-activity" class="page">
+  <div class="card">
+    <h2>Pick an activity</h2>
+    <div class="emoji-grid cols-2" id="activityGrid"></div>
+  </div>
+</div>
+
+<!-- PAGE 5: THANK YOU -->
+<div id="page-thanks" class="page">
+  <div class="card">
+    <div class="checkmark">&#10024;</div>
+    <h1>Thank you!</h1>
+    <h2>Copy and paste into chat</h2>
+    <button class="btn" id="btnCopy">Copy Results</button>
+    <div class="copied-toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================
+   CONFIGURATION - edit these two values
+   ============================================ */
+const PASSWORD = "letmein";   // <-- change this
+/* ============================================ */
+
+const results = {};
+
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* -- Password page -- */
+const pwInput   = document.getElementById('pw');
+const pwError   = document.getElementById('pwError');
+const toggleEye = document.getElementById('toggleEye');
+
+toggleEye.addEventListener('click', function() {
+  var hidden = pwInput.type === 'password';
+  pwInput.type = hidden ? 'text' : 'password';
+  toggleEye.innerHTML = hidden ? '&#128065;&#65039;' : '&#128584;';
+});
+
+document.getElementById('btnUnlock').addEventListener('click', checkPw);
+pwInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPw(); });
+
+function checkPw() {
+  if (pwInput.value === PASSWORD) {
+    pwError.textContent = '';
+    show('page-poem');
+  } else {
+    pwError.textContent = 'Wrong code, try again!';
+    pwInput.value = '';
+    pwInput.focus();
+  }
+}
+
+/* -- Poem next -- */
+document.getElementById('btnNext').addEventListener('click', function() { show('page-food'); });
+
+/* -- Food grid -- */
+var foods = [
+  { emoji: '\uD83C\uDF2E', label: 'Tacos',      value: 'tacos' },
+  { emoji: '\uD83C\uDF63', label: 'Sushi',      value: 'sushi' },
+  { emoji: '\uD83E\uDD5F', label: 'Empanada',   value: 'empanada' },
+  { emoji: '\uD83C\uDF54', label: 'Hamburgers', value: 'hamburgers' },
+  { emoji: '\uD83C\uDF5D', label: 'Pasta',      value: 'pasta' },
+  { emoji: '\uD83C\uDF66', label: 'Ice Cream',  value: 'ice cream' },
+];
+
+var foodGrid = document.getElementById('foodGrid');
+foods.forEach(function(f) {
+  var btn = document.createElement('button');
+  btn.className = 'emoji-btn';
+  btn.innerHTML = '<span class="icon">' + f.emoji + '</span><span class="label">' + f.label + '</span>';
+  btn.addEventListener('click', function() {
+    results.food = f.value;
+    show('page-activity');
+  });
+  foodGrid.appendChild(btn);
+});
+
+/* -- Activity grid -- */
+var activities = [
+  { emoji: '\uD83C\uDFAC', label: 'Movies', value: 'movies' },
+  { emoji: '\uD83D\uDCDA', label: 'Books',  value: 'books' },
+  { emoji: '\uD83C\uDFAE', label: 'Games',  value: 'games' },
+  { emoji: '\uD83C\uDFA8', label: 'Paint',  value: 'paint' },
+];
+
+var actGrid = document.getElementById('activityGrid');
+activities.forEach(function(a) {
+  var btn = document.createElement('button');
+  btn.className = 'emoji-btn';
+  btn.innerHTML = '<span class="icon">' + a.emoji + '</span><span class="label">' + a.label + '</span>';
+  btn.addEventListener('click', function() {
+    results.activity = a.value;
+    show('page-thanks');
+  });
+  actGrid.appendChild(btn);
+});
+
+/* -- Copy results -- */
+document.getElementById('btnCopy').addEventListener('click', function() {
+  var text = 'Food: ' + results.food + '\nActivity: ' + results.activity;
+  var toast = document.getElementById('toast');
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      toast.textContent = 'Copied!';
+    }).catch(function() {
+      fallbackCopy(text, toast);
+    });
+  } else {
+    fallbackCopy(text, toast);
+  }
+  setTimeout(function() { toast.textContent = ''; }, 2500);
+});
+
+function fallbackCopy(text, toast) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.setSelectionRange(0, ta.value.length);
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  toast.textContent = 'Copied!';
+}
+</script>
+</body>
+</html>
