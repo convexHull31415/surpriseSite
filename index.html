@@ -239,7 +239,16 @@
   </div>
 </div>
 
-<!-- PAGE 2: DAY & TIME -->
+<!-- PAGE 2: POEM -->
+<div id="page-poem" class="page">
+  <div class="card">
+    <h1>A Little Something&hellip;</h1>
+    <div class="poem" id="poemText">POEM</div>
+    <button class="btn" id="btnNext">Next &rarr;</button>
+  </div>
+</div>
+
+<!-- PAGE 3: DAY & TIME -->
 <div id="page-datetime" class="page">
   <div class="card">
     <h1>Pick a Day and Time</h1>
@@ -249,16 +258,7 @@
   </div>
 </div>
 
-<!-- PAGE 3: POEM -->
-<div id="page-poem" class="page">
-  <div class="card">
-    <h1>A Little Something&hellip;</h1>
-    <div class="poem" id="poemText">POEM</div>
-    <button class="btn" id="btnNext">Next &rarr;</button>
-  </div>
-</div>
-
-<!-- PAGE 3: FOOD -->
+<!-- PAGE 4: FOOD -->
 <div id="page-food" class="page">
   <div class="card">
     <h2>Pick your craving</h2>
@@ -316,7 +316,7 @@ pwInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPw
 function checkPw() {
   if (pwInput.value === PASSWORD) {
     pwError.textContent = '';
-    show('page-datetime');
+    show('page-poem');
   } else {
     pwError.textContent = 'Wrong code, try again!';
     pwInput.value = '';
@@ -388,14 +388,14 @@ function checkPw() {
       if (!selectedDay) return;
       results.day = selectedDay;
       results.time = t;
-      show('page-poem');
+      show('page-food');
     });
     timeGrid.appendChild(btn);
   });
 })();
 
 /* -- Poem next -- */
-document.getElementById('btnNext').addEventListener('click', function() { show('page-food'); });
+document.getElementById('btnNext').addEventListener('click', function() { show('page-datetime'); });
 
 /* -- Food grid -- */
 var foods = [
