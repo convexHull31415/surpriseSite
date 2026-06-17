@@ -214,6 +214,63 @@
     pointer-events: none;
   }
 
+  /* ── Date ask page ── */
+  .ask-buttons {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+  }
+  .ask-btn {
+    flex: 1;
+    padding: 16px 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .ask-btn:active { transform: scale(0.95); opacity: 0.85; }
+  .ask-btn.yes { background: #27ae60; color: #fff; }
+  .ask-btn.no  { background: #555; color: #fff; }
+
+  /* ── Oops modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,.6);
+  }
+  .modal-box img {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .modal-box p {
+    font-size: 1.15rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
   @media (max-width: 400px) {
     .card { padding: 28px 18px; }
     .emoji-btn .icon { font-size: 2.2rem; }
@@ -221,6 +278,7 @@
     .time-grid { grid-template-columns: repeat(2, 1fr); }
     .day-btn { padding: 12px 4px; }
     .day-btn .day-name { font-size: 0.85rem; }
+    .modal-box img { width: 140px; height: 140px; }
   }
 </style>
 </head>
@@ -239,7 +297,27 @@
   </div>
 </div>
 
-<!-- PAGE 2: POEM -->
+<!-- PAGE 2: DATE ASK -->
+<div id="page-ask" class="page">
+  <div class="card">
+    <h1>Do you want to go on a date with me?</h1>
+    <div class="ask-buttons">
+      <button class="ask-btn no" id="btnNo">No</button>
+      <button class="ask-btn yes" id="btnYes">Yes</button>
+    </div>
+  </div>
+</div>
+
+<!-- OOPS MODAL -->
+<div class="modal-overlay" id="oopsModal">
+  <div class="modal-box">
+    <img src="https://i.pinimg.com/736x/e8/60/14/e86014fe973a07eca065c13874b79a1b.jpg" alt="Spongebob teehee">
+    <p>Oops, wrong button teehee</p>
+    <button class="btn" id="btnOopsBack">Go Back</button>
+  </div>
+</div>
+
+<!-- PAGE 3: POEM -->
 <div id="page-poem" class="page">
   <div class="card">
     <h1>A Little Something&hellip;</h1>
@@ -316,13 +394,22 @@ pwInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPw
 function checkPw() {
   if (pwInput.value === PASSWORD) {
     pwError.textContent = '';
-    show('page-poem');
+    show('page-ask');
   } else {
     pwError.textContent = 'Wrong code, try again!';
     pwInput.value = '';
     pwInput.focus();
   }
 }
+
+/* -- Date ask page -- */
+document.getElementById('btnYes').addEventListener('click', function() { show('page-poem'); });
+document.getElementById('btnNo').addEventListener('click', function() {
+  document.getElementById('oopsModal').classList.add('visible');
+});
+document.getElementById('btnOopsBack').addEventListener('click', function() {
+  document.getElementById('oopsModal').classList.remove('visible');
+});
 
 /* -- Day & Time picker -- */
 (function() {
