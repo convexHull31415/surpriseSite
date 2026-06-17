@@ -154,10 +154,73 @@
     min-height: 1.2em;
   }
 
+  /* ── Day & Time picker ── */
+  .day-picker {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .day-btn {
+    flex: 1;
+    padding: 14px 6px;
+    border: 2px solid #333;
+    border-radius: 12px;
+    background: #111;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    text-align: center;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .day-btn:active { transform: scale(0.95); }
+  .day-btn:hover  { border-color: var(--accent); background: #1e1028; }
+  .day-btn.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .day-btn .day-name { font-weight: 700; font-size: 0.95rem; }
+  .day-btn .day-date { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+  .day-btn.selected .day-date { color: rgba(255,255,255,.8); }
+
+  .time-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .time-btn {
+    padding: 12px 6px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background: #111;
+    color: var(--text);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .time-btn:active { transform: scale(0.95); }
+  .time-btn:hover  { border-color: var(--accent); background: #1e1028; }
+
+  .time-grid.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
   @media (max-width: 400px) {
     .card { padding: 28px 18px; }
     .emoji-btn .icon { font-size: 2.2rem; }
     .emoji-grid { gap: 10px; }
+    .time-grid { grid-template-columns: repeat(2, 1fr); }
+    .day-btn { padding: 12px 4px; }
+    .day-btn .day-name { font-size: 0.85rem; }
   }
 </style>
 </head>
@@ -176,7 +239,17 @@
   </div>
 </div>
 
-<!-- PAGE 2: POEM -->
+<!-- PAGE 2: DAY & TIME -->
+<div id="page-datetime" class="page">
+  <div class="card">
+    <h1>Pick a Day and Time</h1>
+    <div class="day-picker" id="dayPicker"></div>
+    <div class="time-label" id="timeLabel">Select a day first</div>
+    <div class="time-grid disabled" id="timeGrid"></div>
+  </div>
+</div>
+
+<!-- PAGE 3: POEM -->
 <div id="page-poem" class="page">
   <div class="card">
     <h1>A Little Something&hellip;</h1>
@@ -243,13 +316,83 @@ pwInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPw
 function checkPw() {
   if (pwInput.value === PASSWORD) {
     pwError.textContent = '';
-    show('page-poem');
+    show('page-datetime');
   } else {
     pwError.textContent = 'Wrong code, try again!';
     pwInput.value = '';
     pwInput.focus();
   }
 }
+
+/* -- Day & Time picker -- */
+(function() {
+  var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // Find next Friday (or today if already Fri/Sat/Sun)
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  var dow = today.getDay(); // 0=Sun ... 6=Sat
+  var daysUntilFri;
+  if (dow === 5) daysUntilFri = 0;       // today is Friday
+  else if (dow === 6) daysUntilFri = 6;   // Saturday -> next Friday
+  else if (dow === 0) daysUntilFri = 5;   // Sunday -> next Friday
+  else daysUntilFri = 5 - dow;            // Mon-Thu -> this Friday
+
+  var friday = new Date(today);
+  friday.setDate(today.getDate() + daysUntilFri);
+
+  var weekendDays = [];
+  for (var i = 0; i < 3; i++) {
+    var d = new Date(friday);
+    d.setDate(friday.getDate() + i);
+    weekendDays.push(d);
+  }
+
+  var dayPicker = document.getElementById('dayPicker');
+  var timeGrid  = document.getElementById('timeGrid');
+  var timeLabel = document.getElementById('timeLabel');
+  var selectedDay = null;
+
+  weekendDays.forEach(function(date) {
+    var btn = document.createElement('button');
+    btn.className = 'day-btn';
+    btn.innerHTML = '<div class="day-name">' + DAYS[date.getDay()] + '</div>' +
+                    '<div class="day-date">' + MONTHS[date.getMonth()] + ' ' + date.getDate() + '</div>';
+    btn.addEventListener('click', function() {
+      selectedDay = DAYS[date.getDay()] + ', ' + MONTHS[date.getMonth()] + ' ' + date.getDate();
+      dayPicker.querySelectorAll('.day-btn').forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      timeLabel.textContent = 'Pick a time';
+      timeGrid.classList.remove('disabled');
+    });
+    dayPicker.appendChild(btn);
+  });
+
+  // Generate times 5:00 PM - 10:00 PM in 30-min increments
+  var times = [];
+  for (var h = 17; h <= 22; h++) {
+    for (var m = 0; m < 60; m += 30) {
+      if (h === 22 && m === 30) break; // stop at 10:00 PM
+      var hour12 = h > 12 ? h - 12 : h;
+      var label = hour12 + ':' + (m === 0 ? '00' : '30') + ' PM';
+      times.push(label);
+    }
+  }
+
+  times.forEach(function(t) {
+    var btn = document.createElement('button');
+    btn.className = 'time-btn';
+    btn.textContent = t;
+    btn.addEventListener('click', function() {
+      if (!selectedDay) return;
+      results.day = selectedDay;
+      results.time = t;
+      show('page-poem');
+    });
+    timeGrid.appendChild(btn);
+  });
+})();
 
 /* -- Poem next -- */
 document.getElementById('btnNext').addEventListener('click', function() { show('page-food'); });
@@ -298,7 +441,7 @@ activities.forEach(function(a) {
 
 /* -- Copy results -- */
 document.getElementById('btnCopy').addEventListener('click', function() {
-  var text = 'Food: ' + results.food + '\nActivity: ' + results.activity;
+  var text = 'Date: ' + results.day + '\nTime: ' + results.time + '\nFood: ' + results.food + '\nActivity: ' + results.activity;
   var toast = document.getElementById('toast');
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
