@@ -353,6 +353,10 @@
   <div class="card">
     <h2>Pick an activity</h2>
     <div class="emoji-grid cols-2" id="activityGrid"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;width:100%;">
+      <input type="text" id="customActivity" placeholder="Or type your own..." style="flex:1;padding:12px 16px;border:2px solid #333;border-radius:12px;background:#111;color:#eee;font-size:0.95rem;outline:none;">
+      <button class="btn" id="btnCustomActivity" style="padding:12px 20px;font-size:0.9rem;">Go</button>
+    </div>
   </div>
 </div>
 
@@ -543,6 +547,18 @@ activities.forEach(function(a) {
   });
   actGrid.appendChild(btn);
 });
+
+/* -- Custom activity input -- */
+var customActInput = document.getElementById('customActivity');
+document.getElementById('btnCustomActivity').addEventListener('click', submitCustomActivity);
+customActInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') submitCustomActivity(); });
+function submitCustomActivity() {
+  var val = customActInput.value.trim();
+  if (!val) return;
+  results.activity = val;
+  customActInput.value = '';
+  show('page-thanks');
+}
 
 /* -- Change choices -- */
 document.getElementById('btnChange').addEventListener('click', function() { show('page-datetime'); });
