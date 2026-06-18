@@ -377,8 +377,28 @@
 /* ============================================
    CONFIGURATION - edit these two values
    ============================================ */
-const PASSWORD = "letmein";   // <-- change this
+const PASSWORD_HASH = "b05fa34e8e5102e391b22e21be09db27e03498823eda72c2bdd2a55560468702";  // <-- hash of "letmein"
+// To change the password:
+//   1. Open this page in a browser
+//   2. Open the console (F12 > Console)
+//   3. Type: generateHash("yournewpassword")
+//   4. Copy the hash and replace PASSWORD_HASH above
 /* ============================================ */
+
+async function hashText(text) {
+  var encoder = new TextEncoder();
+  var data = encoder.encode(text);
+  var buffer = await crypto.subtle.digest('SHA-256', data);
+  var arr = Array.from(new Uint8Array(buffer));
+  return arr.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
+async function generateHash(password) {
+  var hash = await hashText(password);
+  console.log('Hash for "' + password + '":\n' + hash);
+  console.log('Replace PASSWORD_HASH in the code with this value.');
+  return hash;
+}
 
 const results = {};
 
@@ -401,8 +421,9 @@ toggleEye.addEventListener('click', function() {
 document.getElementById('btnUnlock').addEventListener('click', checkPw);
 pwInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPw(); });
 
-function checkPw() {
-  if (pwInput.value === PASSWORD) {
+async function checkPw() {
+  var hash = await hashText(pwInput.value);
+  if (hash === PASSWORD_HASH) {
     pwError.textContent = '';
     show('page-ask');
   } else {
