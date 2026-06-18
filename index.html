@@ -341,6 +341,10 @@
   <div class="card">
     <h2>Pick your craving</h2>
     <div class="emoji-grid" id="foodGrid"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;width:100%;">
+      <input type="text" id="customFood" placeholder="Or type your own..." style="flex:1;padding:12px 16px;border:2px solid #333;border-radius:12px;background:#111;color:#eee;font-size:0.95rem;outline:none;">
+      <button class="btn" id="btnCustomFood" style="padding:12px 20px;font-size:0.9rem;">Go</button>
+    </div>
   </div>
 </div>
 
@@ -507,6 +511,18 @@ foods.forEach(function(f) {
   });
   foodGrid.appendChild(btn);
 });
+
+/* -- Custom food input -- */
+var customFoodInput = document.getElementById('customFood');
+document.getElementById('btnCustomFood').addEventListener('click', submitCustomFood);
+customFoodInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') submitCustomFood(); });
+function submitCustomFood() {
+  var val = customFoodInput.value.trim();
+  if (!val) return;
+  results.food = val;
+  customFoodInput.value = '';
+  show('page-activity');
+}
 
 /* -- Activity grid -- */
 var activities = [
