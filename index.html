@@ -717,7 +717,7 @@ document.getElementById('btnChange').addEventListener('click', function() { show
 
 /* -- Copy results -- */
 document.getElementById('btnCopy').addEventListener('click', function() {
-  var text = 'Date: ' + results.day + '\nTime: ' + results.time + '\nFood: ' + results.food + '\nActivity: ' + results.activity;
+  var text = 'My love, our date: \nDate: ' + results.day + '\nTime: ' + results.time + '\nFood: ' + results.food + '\nActivity: ' + results.activity;
   var toast = document.getElementById('toast');
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
